@@ -566,11 +566,13 @@
                 const maxAnnual = balance * maxPercentage;
                 const maxProrated = maxAnnual * proRataFactor;
 
-                // Rounding
-                const finalMinAnnual = Math.round(minAnnual);
-                const finalMinProrated = Math.round(minProrated);
-                const finalMaxAnnual = Math.round(maxAnnual);
-                const finalMaxProrated = Math.round(maxProrated);
+                // Round to nearest $10
+                const roundToTen = (num) => Math.round(num / 10) * 10;
+
+                const finalMinAnnual = roundToTen(minAnnual);
+                const finalMinProrated = roundToTen(minProrated);
+                const finalMaxAnnual = roundToTen(maxAnnual);
+                const finalMaxProrated = roundToTen(maxProrated);
 
                 // Frequency Calculation (based on Pro-rated Minimum)
                 const freq = freqInput.value;
