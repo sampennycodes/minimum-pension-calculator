@@ -269,32 +269,30 @@
         <div class="calculator-card">
             <header>
                 <h1>Minimum pension payments calculator</h1>
-                <p>Estimate the minimum pension you need to withdraw from your account based on your age and balance.
-                </p>
+                <p>Estimate the minimum and maximum pension limits based on your age, balance, and account type.</p>
             </header>
 
             <main>
                 <form id="pension-form" novalidate>
-                    <!-- Age Input -->
+                    <!-- DOB Input -->
                     <div class="form-group">
-                        <label for="age">Age at 1 July</label>
-                        <input type="number" id="age" name="age" min="18" max="110" placeholder="e.g. 65"
-                            aria-describedby="age-helper age-error" required>
-                        <span id="age-helper" class="helper-text">Your age at the start of the financial year (1
-                            July).</span>
-                        <div id="age-error" class="error-message" role="alert"></div>
+                        <label for="dob">Date of birth</label>
+                        <input type="date" id="dob" name="dob" aria-describedby="dob-helper dob-error" required>
+                        <span id="dob-helper" class="helper-text">Used to calculate your age at the pension start
+                            date.</span>
+                        <div id="dob-error" class="error-message" role="alert"></div>
                     </div>
 
                     <!-- Balance Input -->
                     <div class="form-group">
-                        <label for="balance">Account balance at 1 July</label>
+                        <label for="balance">Account balance at commencement</label>
                         <div class="input-group has-prefix">
                             <span class="input-prefix">$</span>
                             <input type="text" inputmode="decimal" id="balance" name="balance"
                                 placeholder="e.g. 500,000" aria-describedby="balance-helper balance-error" required>
                         </div>
-                        <span id="balance-helper" class="helper-text">Your account balance at the start of the financial
-                            year or when your pension commenced.</span>
+                        <span id="balance-helper" class="helper-text">Your account balance when your pension
+                            commenced.</span>
                         <div id="balance-error" class="error-message" role="alert"></div>
                     </div>
 
@@ -303,9 +301,22 @@
                         <label for="start-date">Pension start date</label>
                         <input type="date" id="start-date" name="start-date" aria-describedby="date-helper date-error"
                             required>
-                        <span id="date-helper" class="helper-text">If your pension started partway through the year,
-                            we'll pro-rate the minimum.</span>
+                        <span id="date-helper" class="helper-text">Used to determine the pro-rata factor for the
+                            financial year.</span>
                         <div id="date-error" class="error-message" role="alert"></div>
+                    </div>
+
+                    <!-- Account Type Input -->
+                    <div class="form-group">
+                        <label for="account-type">Pension account type</label>
+                        <div class="select-wrapper">
+                            <select id="account-type" name="account-type" aria-describedby="type-error" required>
+                                <option value="">Select account type</option>
+                                <option value="ttr">Transition to Retirement</option>
+                                <option value="retirement">Retirement</option>
+                            </select>
+                        </div>
+                        <div id="type-error" class="error-message" role="alert"></div>
                     </div>
 
                     <!-- Frequency Input -->
@@ -321,20 +332,38 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn-primary">Calculate minimum</button>
+                    <button type="submit" class="btn-primary">Calculate limits</button>
                 </form>
 
                 <!-- Results Region -->
                 <section id="results" class="results-container" aria-live="polite" aria-atomic="true">
-                    <h2>Your estimated minimum payment</h2>
+                    <h2>Your estimated payment limits</h2>
 
                     <div class="result-item">
-                        <span class="result-label">Minimum annual pension</span>
-                        <span id="result-annual" class="result-value">$0</span>
+                        <span class="result-label">Minimum annual amount</span>
+                        <span id="result-min-annual" class="result-value">$0</span>
                     </div>
 
                     <div class="result-item">
-                        <span class="result-label">Payment amount (<span id="result-freq-label">Annual</span>)</span>
+                        <span class="result-label">Minimum pro-rated amount</span>
+                        <span id="result-min-prorated" class="result-value">$0</span>
+                    </div>
+
+                    <div class="result-item">
+                        <span class="result-label">Maximum annual amount</span>
+                        <span id="result-max-annual" class="result-value">$0</span>
+                    </div>
+
+                    <div class="result-item">
+                        <span class="result-label">Maximum pro-rated amount</span>
+                        <span id="result-max-prorated" class="result-value">$0</span>
+                    </div>
+
+                    <div class="result-item"
+                        style="margin-top: 24px; border-top: 1px solid var(--rest-border); padding-top: 16px;">
+                        <span class="result-label">Payment amount per frequency (<span
+                                id="result-freq-label">Annual</span>)</span>
+                        <span class="helper-text" style="margin-bottom: 4px;">Based on minimum pro-rated amount</span>
                         <span id="result-payment" class="result-value">$0</span>
                     </div>
 
@@ -360,25 +389,26 @@
             const resultsContainer = container.querySelector('#results');
 
             // Inputs
-            const ageInput = container.querySelector('#age');
+            const dobInput = container.querySelector('#dob');
             const balanceInput = container.querySelector('#balance');
             const dateInput = container.querySelector('#start-date');
+            const accountTypeInput = container.querySelector('#account-type');
             const freqInput = container.querySelector('#frequency');
 
             // Error elements
-            const ageError = container.querySelector('#age-error');
+            const dobError = container.querySelector('#dob-error');
             const balanceError = container.querySelector('#balance-error');
             const dateError = container.querySelector('#date-error');
+            const typeError = container.querySelector('#type-error');
 
             // Result elements
-            const resultAnnual = container.querySelector('#result-annual');
+            const resultMinAnnual = container.querySelector('#result-min-annual');
+            const resultMinProrated = container.querySelector('#result-min-prorated');
+            const resultMaxAnnual = container.querySelector('#result-max-annual');
+            const resultMaxProrated = container.querySelector('#result-max-prorated');
             const resultPayment = container.querySelector('#result-payment');
             const resultFreqLabel = container.querySelector('#result-freq-label');
             const resultSummary = container.querySelector('#result-summary');
-
-            // Constants
-            const MIN_AGE = 18;
-            const MAX_AGE = 110;
 
             // Helper: Format currency
             const formatCurrency = (amount) => {
@@ -393,7 +423,6 @@
             // Helper: Parse float with commas
             const parseBalance = (val) => {
                 if (!val) return NaN;
-                // Remove commas and spaces
                 const cleanVal = val.replace(/[, ]/g, '');
                 return parseFloat(cleanVal);
             };
@@ -425,11 +454,11 @@
 
             // Helper: Clear errors
             const clearErrors = () => {
-                [ageError, balanceError, dateError].forEach(el => {
+                [dobError, balanceError, dateError, typeError].forEach(el => {
                     el.style.display = 'none';
                     el.textContent = '';
                 });
-                [ageInput, balanceInput, dateInput].forEach(el => {
+                [dobInput, balanceInput, dateInput, accountTypeInput].forEach(el => {
                     el.classList.remove('input-error');
                 });
             };
@@ -450,10 +479,10 @@
 
                 let isValid = true;
 
-                // 1. Validate Age
-                const age = parseInt(ageInput.value, 10);
-                if (isNaN(age) || age < MIN_AGE || age > MAX_AGE) {
-                    showError(ageError, `Please enter an age between ${MIN_AGE} and ${MAX_AGE}.`);
+                // 1. Validate DOB
+                const dobStr = dobInput.value;
+                if (!dobStr) {
+                    showError(dobError, "Please enter your date of birth.");
                     isValid = false;
                 }
 
@@ -464,21 +493,38 @@
                     isValid = false;
                 }
 
-                // 3. Validate Date
+                // 3. Validate Start Date
                 const dateStr = dateInput.value;
                 if (!dateStr) {
                     showError(dateError, "Please select a pension start date.");
                     isValid = false;
                 }
 
+                // 4. Validate Account Type
+                const accountType = accountTypeInput.value;
+                if (!accountType) {
+                    showError(typeError, "Please select a pension account type.");
+                    isValid = false;
+                }
+
+                if (!isValid) return;
+
+                // Date Objects
+                const dob = new Date(dobStr);
                 const startDate = new Date(dateStr);
                 const today = new Date();
-                // Reset time parts for accurate date comparison
                 today.setHours(0, 0, 0, 0);
                 startDate.setHours(0, 0, 0, 0);
+                dob.setHours(0, 0, 0, 0);
 
+                // Logic Validations
                 if (startDate > today) {
                     showError(dateError, "Pension start date cannot be in the future.");
+                    isValid = false;
+                }
+
+                if (startDate <= dob) {
+                    showError(dateError, "Pension start date must be after date of birth.");
                     isValid = false;
                 }
 
@@ -486,84 +532,87 @@
 
                 // --- Calculation ---
 
+                // Age at Commencement Calculation
+                // age = floor( (pensionStartDate - dateOfBirth) / 365.25 )
+                const diffTimeAge = startDate.getTime() - dob.getTime();
+                const age = Math.floor(diffTimeAge / (365.25 * 24 * 60 * 60 * 1000));
+
                 // Determine Financial Year based on Start Date
                 let fyEndYear = startDate.getFullYear();
                 if (startDate.getMonth() >= 6) { // July (6) or later
                     fyEndYear += 1;
                 }
-
-                const fyEndDate = new Date(fyEndYear, 5, 30); // Month is 0-indexed, 5 is June.
+                const fyEndDate = new Date(fyEndYear, 5, 30); // June 30
 
                 // Calculate days in the financial year (denominator)
                 const denominator = isLeapYear(fyEndYear) ? 366 : 365;
 
                 // Calculate days remaining (numerator)
-                const diffTime = fyEndDate.getTime() - startDate.getTime();
+                const diffTimeFY = fyEndDate.getTime() - startDate.getTime();
                 // Convert to days. Add 1 to be inclusive of start date.
-                const daysRemaining = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                const daysRemaining = Math.floor(diffTimeFY / (1000 * 60 * 60 * 24)) + 1;
 
                 // Pro-rata factor
                 const proRataFactor = daysRemaining / denominator;
 
-                // Get percentage
-                const percentage = getDrawdownPercentage(age);
+                // Minimum Calculation
+                const minPercentage = getDrawdownPercentage(age);
+                const minAnnual = balance * minPercentage;
+                const minProrated = minAnnual * proRataFactor;
 
-                // Calculate Annual Minimum
-                const fullYearMinimum = balance * percentage;
-                const proRatedMinimum = fullYearMinimum * proRataFactor;
+                // Maximum Calculation
+                // TTR = 10%, Retirement = 100%
+                const maxPercentage = (accountType === 'ttr') ? 0.10 : 1.00;
+                const maxAnnual = balance * maxPercentage;
+                const maxProrated = maxAnnual * proRataFactor;
 
-                // Round to nearest whole dollar
-                const finalAnnualMinimum = Math.round(proRatedMinimum);
+                // Rounding
+                const finalMinAnnual = Math.round(minAnnual);
+                const finalMinProrated = Math.round(minProrated);
+                const finalMaxAnnual = Math.round(maxAnnual);
+                const finalMaxProrated = Math.round(maxProrated);
 
-                // Frequency Calculation
+                // Frequency Calculation (based on Pro-rated Minimum)
                 const freq = freqInput.value;
                 let divisor = 1;
                 let freqLabel = "Annual";
 
                 switch (freq) {
-                    case 'quarterly':
-                        divisor = 4;
-                        freqLabel = "Quarterly";
-                        break;
-                    case 'monthly':
-                        divisor = 12;
-                        freqLabel = "Monthly";
-                        break;
-                    case 'fortnightly':
-                        divisor = 26;
-                        freqLabel = "Fortnightly";
-                        break;
-                    default:
-                        divisor = 1;
-                        freqLabel = "Annual";
+                    case 'quarterly': divisor = 4; freqLabel = "Quarterly"; break;
+                    case 'monthly': divisor = 12; freqLabel = "Monthly"; break;
+                    case 'fortnightly': divisor = 26; freqLabel = "Fortnightly"; break;
+                    default: divisor = 1; freqLabel = "Annual";
                 }
 
-                const paymentAmount = Math.round(finalAnnualMinimum / divisor);
+                const paymentAmount = Math.round(finalMinProrated / divisor);
 
                 // Update UI
-                resultAnnual.textContent = formatCurrency(finalAnnualMinimum);
+                resultMinAnnual.textContent = formatCurrency(finalMinAnnual);
+                resultMinProrated.textContent = formatCurrency(finalMinProrated);
+                resultMaxAnnual.textContent = formatCurrency(finalMaxAnnual);
+                resultMaxProrated.textContent = formatCurrency(finalMaxProrated);
+
                 resultPayment.textContent = formatCurrency(paymentAmount);
                 resultFreqLabel.textContent = freqLabel;
 
                 // Summary Text
-                const summaryText = `Based on your age of ${age} and a balance of ${formatCurrency(balance)}, your minimum drawdown rate is ${(percentage * 100).toFixed(0)}%. 
-        Since your pension started on ${startDate.toLocaleDateString('en-AU')}, which is partway through the financial year, your minimum is pro-rated. 
-        If you choose ${freqLabel.toLowerCase()} payments, each payment would be approximately ${formatCurrency(paymentAmount)}.`;
+                const summaryText = `You were ${age} years old at commencement. 
+                Your minimum drawdown rate is ${(minPercentage * 100).toFixed(0)}% and your maximum is ${(maxPercentage * 100).toFixed(0)}%.
+                Since your pension started on ${startDate.toLocaleDateString('en-AU')}, there are ${daysRemaining} days remaining in the financial year.
+                Your limits have been pro-rated accordingly.`;
 
                 resultSummary.textContent = summaryText;
 
                 // Show results
                 resultsContainer.classList.add('visible');
-
-                // Focus results for accessibility
                 resultsContainer.focus();
             };
 
             // Event Listeners
             form.addEventListener('submit', calculate);
 
-            // Real-time validation removal on input
-            [ageInput, balanceInput, dateInput].forEach(input => {
+            // Real-time validation removal
+            [dobInput, balanceInput, dateInput, accountTypeInput].forEach(input => {
                 input.addEventListener('input', () => {
                     if (input.classList.contains('input-error')) {
                         input.classList.remove('input-error');
