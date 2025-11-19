@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimum Pension Payments Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        /* Scoped styles for the calculator */
+        #rest-minimum-pension-calculator {
+            /* CSS Custom Properties */
+            --rest-green-700: #004634;
+            --rest-green-500: #00a58a;
+            --rest-green-50: #e6f4f0;
+            --rest-ink: #111827;
+            --rest-muted: #4b5563;
+            --rest-border: #d1d5db;
+            --rest-bg: #f9fafb;
+            --rest-error: #b91c1c;
+            --rest-focus-ring: rgba(0, 165, 138, 0.3);
+
+            font-family: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: var(--rest-ink);
+            line-height: 1.5;
+            background-color: var(--rest-bg);
+            padding: 2rem 1rem;
+            box-sizing: border-box;
+        }
+
+        /* Reset box-sizing within the container */
+        #rest-minimum-pension-calculator *,
+        #rest-minimum-pension-calculator *::before,
+        #rest-minimum-pension-calculator *::after {
+            box-sizing: inherit;
+        }
+
+        #rest-minimum-pension-calculator .calculator-card {
+            background-color: #ffffff;
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Typography */
+        #rest-minimum-pension-calculator h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--rest-green-700);
+        }
+
+        #rest-minimum-pension-calculator h2 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--rest-ink);
+        }
+
+        #rest-minimum-pension-calculator p {
+            font-size: 16px;
+            color: var(--rest-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        #rest-minimum-pension-calculator .helper-text {
+            font-size: 14px;
+            color: var(--rest-muted);
+            margin-top: 0.5rem;
+            display: block;
+        }
+
+        /* Form Elements */
+        #rest-minimum-pension-calculator .form-group {
+            margin-bottom: 24px;
+        }
+
+        #rest-minimum-pension-calculator label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--rest-ink);
+            font-size: 16px;
+        }
+
+        #rest-minimum-pension-calculator input[type="number"],
+        #rest-minimum-pension-calculator input[type="text"],
+        #rest-minimum-pension-calculator input[type="date"],
+        #rest-minimum-pension-calculator select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--rest-border);
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            color: var(--rest-ink);
+            background-color: #fff;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            appearance: none;
+            /* Remove default arrow for select in some browsers */
+        }
+
+        /* Custom select arrow */
+        #rest-minimum-pension-calculator .select-wrapper {
+            position: relative;
+        }
+
+        #rest-minimum-pension-calculator .select-wrapper::after {
+            content: "▼";
+            font-size: 0.8rem;
+            color: var(--rest-muted);
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        #rest-minimum-pension-calculator input:focus,
+        #rest-minimum-pension-calculator select:focus {
+            outline: none;
+            border-color: var(--rest-green-500);
+            box-shadow: 0 0 0 3px var(--rest-focus-ring);
+        }
+
+        #rest-minimum-pension-calculator .input-error {
+            border-color: var(--rest-error) !important;
+        }
+
+        #rest-minimum-pension-calculator .error-message {
+            color: var(--rest-error);
+            font-size: 14px;
+            margin-top: 6px;
+            display: none;
+            font-weight: 500;
+        }
+
+        #rest-minimum-pension-calculator .input-group {
+            position: relative;
+        }
+
+        #rest-minimum-pension-calculator .input-prefix {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--rest-muted);
+            pointer-events: none;
+        }
+
+        #rest-minimum-pension-calculator .has-prefix input {
+            padding-left: 32px;
+        }
+
+        /* Button */
+        #rest-minimum-pension-calculator .btn-primary {
+            display: inline-block;
+            width: 100%;
+            background-color: var(--rest-green-700);
+            color: white;
+            font-weight: 600;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 9999px;
+            /* Pill shape */
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        #rest-minimum-pension-calculator .btn-primary:hover {
+            background-color: var(--rest-green-500);
+        }
+
+        #rest-minimum-pension-calculator .btn-primary:disabled {
+            background-color: var(--rest-muted);
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* Results Section */
+        #rest-minimum-pension-calculator .results-container {
+            margin-top: 32px;
+            padding: 24px;
+            background-color: var(--rest-green-50);
+            border-radius: 12px;
+            border: 1px solid var(--rest-green-500);
+            display: none;
+            /* Hidden by default */
+        }
+
+        #rest-minimum-pension-calculator .results-container.visible {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        #rest-minimum-pension-calculator .result-item {
+            margin-bottom: 16px;
+        }
+
+        #rest-minimum-pension-calculator .result-label {
+            font-size: 14px;
+            color: var(--rest-muted);
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        #rest-minimum-pension-calculator .result-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--rest-green-700);
+        }
+
+        #rest-minimum-pension-calculator .result-summary {
+            margin-top: 16px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--rest-ink);
+        }
+
+        /* Disclaimer */
+        #rest-minimum-pension-calculator .disclaimer {
+            margin-top: 32px;
+            font-size: 13px;
+            color: var(--rest-muted);
+            line-height: 1.5;
+            border-top: 1px solid var(--rest-border);
+            padding-top: 16px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (min-width: 640px) {
+            #rest-minimum-pension-calculator h1 {
+                font-size: 32px;
+            }
+
+            #rest-minimum-pension-calculator .btn-primary {
+                width: auto;
+                min-width: 200px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="rest-minimum-pension-calculator">
+        <div class="calculator-card">
+            <header>
+                <h1>Minimum pension payments calculator</h1>
+                <p>Estimate the minimum pension you need to withdraw from your account based on your age and balance.
+                </p>
+            </header>
+
+            <main>
+                <form id="pension-form" novalidate>
+                    <!-- Age Input -->
+                    <div class="form-group">
+                        <label for="age">Age at 1 July</label>
+                        <input type="number" id="age" name="age" min="18" max="110" placeholder="e.g. 65"
+                            aria-describedby="age-helper age-error" required>
+                        <span id="age-helper" class="helper-text">Your age at the start of the financial year (1
+                            July).</span>
+                        <div id="age-error" class="error-message" role="alert"></div>
+                    </div>
+
+                    <!-- Balance Input -->
+                    <div class="form-group">
+                        <label for="balance">Account balance at 1 July</label>
+                        <div class="input-group has-prefix">
+                            <span class="input-prefix">$</span>
+                            <input type="text" inputmode="decimal" id="balance" name="balance"
+                                placeholder="e.g. 500,000" aria-describedby="balance-helper balance-error" required>
+                        </div>
+                        <span id="balance-helper" class="helper-text">Your account balance at the start of the financial
+                            year or when your pension commenced.</span>
+                        <div id="balance-error" class="error-message" role="alert"></div>
+                    </div>
+
+                    <!-- Start Date Input -->
+                    <div class="form-group">
+                        <label for="start-date">Pension start date</label>
+                        <input type="date" id="start-date" name="start-date" aria-describedby="date-helper date-error"
+                            required>
+                        <span id="date-helper" class="helper-text">If your pension started partway through the year,
+                            we'll pro-rate the minimum.</span>
+                        <div id="date-error" class="error-message" role="alert"></div>
+                    </div>
+
+                    <!-- Frequency Input -->
+                    <div class="form-group">
+                        <label for="frequency">Payment frequency</label>
+                        <div class="select-wrapper">
+                            <select id="frequency" name="frequency">
+                                <option value="annual">Annual</option>
+                                <option value="quarterly">Quarterly</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="fortnightly">Fortnightly</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Calculate minimum</button>
+                </form>
+
+                <!-- Results Region -->
+                <section id="results" class="results-container" aria-live="polite" aria-atomic="true">
+                    <h2>Your estimated minimum payment</h2>
+
+                    <div class="result-item">
+                        <span class="result-label">Minimum annual pension</span>
+                        <span id="result-annual" class="result-value">$0</span>
+                    </div>
+
+                    <div class="result-item">
+                        <span class="result-label">Payment amount (<span id="result-freq-label">Annual</span>)</span>
+                        <span id="result-payment" class="result-value">$0</span>
+                    </div>
+
+                    <p id="result-summary" class="result-summary"></p>
+                </section>
+
+                <!-- Disclaimer -->
+                <div class="disclaimer">
+                    <p><strong>Important information:</strong> This calculator provides general information only and
+                        does not take into account your personal objectives, financial situation, or needs. Government
+                        rules regarding minimum drawdown rates may change. You should consider seeking financial advice
+                        or checking the latest rules before making decisions about your pension payments.</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            // Scoped to the calculator container to avoid global pollution
+            const container = document.getElementById('rest-minimum-pension-calculator');
+            const form = container.querySelector('#pension-form');
+            const resultsContainer = container.querySelector('#results');
+
+            // Inputs
+            const ageInput = container.querySelector('#age');
+            const balanceInput = container.querySelector('#balance');
+            const dateInput = container.querySelector('#start-date');
+            const freqInput = container.querySelector('#frequency');
+
+            // Error elements
+            const ageError = container.querySelector('#age-error');
+            const balanceError = container.querySelector('#balance-error');
+            const dateError = container.querySelector('#date-error');
+
+            // Result elements
+            const resultAnnual = container.querySelector('#result-annual');
+            const resultPayment = container.querySelector('#result-payment');
+            const resultFreqLabel = container.querySelector('#result-freq-label');
+            const resultSummary = container.querySelector('#result-summary');
+
+            // Constants
+            const MIN_AGE = 18;
+            const MAX_AGE = 110;
+
+            // Helper: Format currency
+            const formatCurrency = (amount) => {
+                return new Intl.NumberFormat('en-AU', {
+                    style: 'currency',
+                    currency: 'AUD',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(amount);
+            };
+
+            // Helper: Parse float with commas
+            const parseBalance = (val) => {
+                if (!val) return NaN;
+                // Remove commas and spaces
+                const cleanVal = val.replace(/[, ]/g, '');
+                return parseFloat(cleanVal);
+            };
+
+            // Helper: Get Minimum Drawdown Percentage based on Age
+            const getDrawdownPercentage = (age) => {
+                if (age < 65) return 0.04;
+                if (age <= 74) return 0.05;
+                if (age <= 79) return 0.06;
+                if (age <= 84) return 0.07;
+                if (age <= 89) return 0.09;
+                if (age <= 94) return 0.11;
+                return 0.14; // 95 and over
+            };
+
+            // Helper: Check if a year is a leap year
+            const isLeapYear = (year) => {
+                return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+            };
+
+            // Helper: Show error
+            const showError = (element, message) => {
+                element.textContent = message;
+                element.style.display = 'block';
+                const inputId = element.id.replace('-error', '');
+                const input = container.querySelector(`#${inputId}`);
+                if (input) input.classList.add('input-error');
+            };
+
+            // Helper: Clear errors
+            const clearErrors = () => {
+                [ageError, balanceError, dateError].forEach(el => {
+                    el.style.display = 'none';
+                    el.textContent = '';
+                });
+                [ageInput, balanceInput, dateInput].forEach(el => {
+                    el.classList.remove('input-error');
+                });
+            };
+
+            // Format Balance on Blur
+            balanceInput.addEventListener('blur', () => {
+                const val = parseBalance(balanceInput.value);
+                if (!isNaN(val)) {
+                    balanceInput.value = new Intl.NumberFormat('en-AU').format(val);
+                }
+            });
+
+            // Main Calculation Logic
+            const calculate = (e) => {
+                e.preventDefault();
+                clearErrors();
+                resultsContainer.classList.remove('visible');
+
+                let isValid = true;
+
+                // 1. Validate Age
+                const age = parseInt(ageInput.value, 10);
+                if (isNaN(age) || age < MIN_AGE || age > MAX_AGE) {
+                    showError(ageError, `Please enter an age between ${MIN_AGE} and ${MAX_AGE}.`);
+                    isValid = false;
+                }
+
+                // 2. Validate Balance
+                const balance = parseBalance(balanceInput.value);
+                if (isNaN(balance) || balance <= 0) {
+                    showError(balanceError, "Please enter an account balance greater than zero.");
+                    isValid = false;
+                }
+
+                // 3. Validate Date
+                const dateStr = dateInput.value;
+                if (!dateStr) {
+                    showError(dateError, "Please select a pension start date.");
+                    isValid = false;
+                }
+
+                const startDate = new Date(dateStr);
+                const today = new Date();
+                // Reset time parts for accurate date comparison
+                today.setHours(0, 0, 0, 0);
+                startDate.setHours(0, 0, 0, 0);
+
+                if (startDate > today) {
+                    showError(dateError, "Pension start date cannot be in the future.");
+                    isValid = false;
+                }
+
+                if (!isValid) return;
+
+                // --- Calculation ---
+
+                // Determine Financial Year based on Start Date
+                let fyEndYear = startDate.getFullYear();
+                if (startDate.getMonth() >= 6) { // July (6) or later
+                    fyEndYear += 1;
+                }
+
+                const fyEndDate = new Date(fyEndYear, 5, 30); // Month is 0-indexed, 5 is June.
+
+                // Calculate days in the financial year (denominator)
+                const denominator = isLeapYear(fyEndYear) ? 366 : 365;
+
+                // Calculate days remaining (numerator)
+                const diffTime = fyEndDate.getTime() - startDate.getTime();
+                // Convert to days. Add 1 to be inclusive of start date.
+                const daysRemaining = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+                // Pro-rata factor
+                const proRataFactor = daysRemaining / denominator;
+
+                // Get percentage
+                const percentage = getDrawdownPercentage(age);
+
+                // Calculate Annual Minimum
+                const fullYearMinimum = balance * percentage;
+                const proRatedMinimum = fullYearMinimum * proRataFactor;
+
+                // Round to nearest whole dollar
+                const finalAnnualMinimum = Math.round(proRatedMinimum);
+
+                // Frequency Calculation
+                const freq = freqInput.value;
+                let divisor = 1;
+                let freqLabel = "Annual";
+
+                switch (freq) {
+                    case 'quarterly':
+                        divisor = 4;
+                        freqLabel = "Quarterly";
+                        break;
+                    case 'monthly':
+                        divisor = 12;
+                        freqLabel = "Monthly";
+                        break;
+                    case 'fortnightly':
+                        divisor = 26;
+                        freqLabel = "Fortnightly";
+                        break;
+                    default:
+                        divisor = 1;
+                        freqLabel = "Annual";
+                }
+
+                const paymentAmount = Math.round(finalAnnualMinimum / divisor);
+
+                // Update UI
+                resultAnnual.textContent = formatCurrency(finalAnnualMinimum);
+                resultPayment.textContent = formatCurrency(paymentAmount);
+                resultFreqLabel.textContent = freqLabel;
+
+                // Summary Text
+                const summaryText = `Based on your age of ${age} and a balance of ${formatCurrency(balance)}, your minimum drawdown rate is ${(percentage * 100).toFixed(0)}%. 
+        Since your pension started on ${startDate.toLocaleDateString('en-AU')}, which is partway through the financial year, your minimum is pro-rated. 
+        If you choose ${freqLabel.toLowerCase()} payments, each payment would be approximately ${formatCurrency(paymentAmount)}.`;
+
+                resultSummary.textContent = summaryText;
+
+                // Show results
+                resultsContainer.classList.add('visible');
+
+                // Focus results for accessibility
+                resultsContainer.focus();
+            };
+
+            // Event Listeners
+            form.addEventListener('submit', calculate);
+
+            // Real-time validation removal on input
+            [ageInput, balanceInput, dateInput].forEach(input => {
+                input.addEventListener('input', () => {
+                    if (input.classList.contains('input-error')) {
+                        input.classList.remove('input-error');
+                        const errorEl = container.querySelector(`#${input.id}-error`);
+                        if (errorEl) errorEl.style.display = 'none';
+                    }
+                });
+            });
+
+        })();
+    </script>
+
+</body>
+
+</html>
