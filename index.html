@@ -1,3 +1,4 @@
+s
 <!DOCTYPE html>
 <html lang="en">
 
@@ -285,7 +286,7 @@
 
                     <!-- Balance Input -->
                     <div class="form-group">
-                        <label for="balance">Account balance at commencement</label>
+                        <label for="balance">Your account balance when your pension commences</label>
                         <div class="input-group has-prefix">
                             <span class="input-prefix">$</span>
                             <input type="text" inputmode="decimal" id="balance" name="balance"
@@ -312,8 +313,8 @@
                         <div class="select-wrapper">
                             <select id="account-type" name="account-type" aria-describedby="type-error" required>
                                 <option value="">Select account type</option>
-                                <option value="ttr">Transition to Retirement</option>
-                                <option value="retirement">Retirement</option>
+                                <option value="ttr">Transition to Retirement account</option>
+                                <option value="retirement">Retirement account</option>
                             </select>
                         </div>
                         <div id="type-error" class="error-message" role="alert"></div>
@@ -325,6 +326,7 @@
                         <div class="select-wrapper">
                             <select id="frequency" name="frequency">
                                 <option value="annual">Annual</option>
+                                <option value="half-yearly">Half-yearly</option>
                                 <option value="quarterly">Quarterly</option>
                                 <option value="monthly">Monthly</option>
                                 <option value="fortnightly">Fortnightly</option>
@@ -339,10 +341,7 @@
                 <section id="results" class="results-container" aria-live="polite" aria-atomic="true">
                     <h2>Your estimated payment limits</h2>
 
-                    <div class="result-item">
-                        <span class="result-label">Minimum annual amount</span>
-                        <span id="result-min-annual" class="result-value">$0</span>
-                    </div>
+
 
                     <div class="result-item">
                         <span class="result-label">Minimum pro-rated amount</span>
@@ -363,7 +362,8 @@
                         style="margin-top: 24px; border-top: 1px solid var(--rest-border); padding-top: 16px;">
                         <span class="result-label">Payment amount per frequency (<span
                                 id="result-freq-label">Annual</span>)</span>
-                        <span class="helper-text" style="margin-bottom: 4px;">Based on minimum pro-rated amount</span>
+                        <span class="helper-text" style="margin-bottom: 4px;">Standard payment amount based on annual
+                            minimum</span>
                         <span id="result-payment" class="result-value">$0</span>
                     </div>
 
@@ -470,6 +470,36 @@
                     balanceInput.value = new Intl.NumberFormat('en-AU').format(val);
                 }
             });
+
+            // Auto-update Account Type based on Age
+            const updateAccountTypeOptions = () => {
+                const dobVal = dobInput.value;
+                const dateVal = dateInput.value;
+                if (!dobVal || !dateVal) return;
+
+                const dob = new Date(dobVal);
+                const start = new Date(dateVal);
+
+                // Calculate age
+                const diffTimeAge = start.getTime() - dob.getTime();
+                const age = Math.floor(diffTimeAge / (365.25 * 24 * 60 * 60 * 1000));
+
+                const ttrOption = accountTypeInput.querySelector('option[value="ttr"]');
+
+                if (age >= 65) {
+                    // TTR not available for 65+
+                    ttrOption.disabled = true;
+                    if (accountTypeInput.value === 'ttr') {
+                        accountTypeInput.value = 'retirement';
+                    }
+                } else {
+                    // TTR available
+                    ttrOption.disabled = false;
+                }
+            };
+
+            dobInput.addEventListener('change', updateAccountTypeOptions);
+            dateInput.addEventListener('change', updateAccountTypeOptions);
 
             // Main Calculation Logic
             const calculate = (e) => {
@@ -580,16 +610,17 @@
                 let freqLabel = "Annual";
 
                 switch (freq) {
+                    case 'half-yearly': divisor = 2; freqLabel = "Half-yearly"; break;
                     case 'quarterly': divisor = 4; freqLabel = "Quarterly"; break;
                     case 'monthly': divisor = 12; freqLabel = "Monthly"; break;
                     case 'fortnightly': divisor = 26; freqLabel = "Fortnightly"; break;
                     default: divisor = 1; freqLabel = "Annual";
                 }
 
-                const paymentAmount = Math.round(finalMinProrated / divisor);
+                const paymentAmount = Math.round(finalMinAnnual / divisor);
 
                 // Update UI
-                resultMinAnnual.textContent = formatCurrency(finalMinAnnual);
+                // resultMinAnnual.textContent = formatCurrency(finalMinAnnual);
                 resultMinProrated.textContent = formatCurrency(finalMinProrated);
                 resultMaxAnnual.textContent = formatCurrency(finalMaxAnnual);
                 resultMaxProrated.textContent = formatCurrency(finalMaxProrated);
